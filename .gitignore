@@ -1,0 +1,12 @@
+data/*
+!data/.gitkeep
+
+error/*
+!error/.gitkeep
+
+results/*
+!results/.gitkeep
+
+
+.ipynb_checkpoints
+config.json
