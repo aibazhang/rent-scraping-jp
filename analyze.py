@@ -71,7 +71,7 @@ def analyze_rent():
 
     newest_frame.to_csv('results/rentable_houses.csv')
     for name in newest_frame[newest_frame['rental_cost_changed']].index.tolist():
-        data[data['物件名'] == name].to_csv('./results/{}.csv'.format(name))
+        data[data['物件名'] == name].sort_values(by='date').to_csv('./results/{}.csv'.format(name))
 
 
 if __name__ == '__main__':
