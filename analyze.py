@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 block_list = json.load(open("./config.json", "r"))["block_list"]
+COLUMNS = ["間取り", "面積", "家賃", "管理費", "敷金", "礼金", "rental_cost", "num_posts", "rental_cost_changed", "立地1", "立地2", "築年数", "階数", "物件階", "date"]
+COLUMNS_PRICE = ["date", "家賃", "管理費", "敷金", "礼金", "rental_cost"]
 
 def read_multi_csv(path='./data'):
     all_files = glob.glob(path + "/*.csv")
@@ -68,10 +70,9 @@ def analyze_rent():
     # 投稿回数を追加する
     num_posts = data.value_counts(['物件名'])
     newest_frame['num_posts'] = num_posts[newest_frame.index].tolist()
-
-    newest_frame.to_csv('results/rentable_houses.csv')
+    newest_frame[COLUMNS].to_csv('results/rentable_houses.csv')
     for name in newest_frame[newest_frame['rental_cost_changed']].index.tolist():
-        data[data['物件名'] == name].sort_values(by='date').to_csv('./results/{}.csv'.format(name))
+        data[data['物件名'] == name].sort_values(by='date')[COLUMNS_PRICE].to_csv('./results/{}.csv'.format(name))
 
 
 if __name__ == '__main__':
