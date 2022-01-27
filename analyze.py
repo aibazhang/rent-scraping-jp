@@ -4,8 +4,9 @@ import glob
 import json
 
 from datetime import datetime
+from pathlib import Path
 
-block_list = json.load(open("./config.json", "r"))["block_list"]
+BLOCK_LIST = json.load(open("./config.json", "r"))["block_list"]
 COLUMNS = [
     "間取り",
     "面積",
@@ -71,7 +72,7 @@ def process_frame(frame):
 
     frame["物件名"] = fix_house_name(frame["物件名"])
     frame = frame[~frame["物件名"].str.contains("階建")]
-    frame = frame[~frame["物件名"].isin(block_list)].copy()
+    frame = frame[~frame["物件名"].isin(BLOCK_LIST)].copy()
 
     frame = frame.join(
         frame.groupby("物件名")["rental_cost"].mean(), on="物件名", rsuffix="_mean"
@@ -94,18 +95,20 @@ def get_newest_frame(frame, only_avaliable=True):
 
 
 def analyze_rent():
+    tag = json.load(open("./config.json", "r"))["tag"]
+    Path("./results/{}".format(tag)).mkdir(parents=True, exist_ok=True)
     data = process_frame(read_multi_csv())
     newest_rentable_frame = get_newest_frame(data)
 
     # 投稿回数を追加する
     num_posts = data.value_counts(["物件名"])
     newest_rentable_frame["num_posts"] = num_posts[newest_rentable_frame.index].tolist()
-    newest_rentable_frame[COLUMNS].to_csv("results/rentable_houses.csv")
+    newest_rentable_frame[COLUMNS].to_csv("./results/{}/rentable_houses.csv".format(tag))
 
     newest_frame = get_newest_frame(data, only_avaliable=False)
     for name in newest_frame[newest_frame["rental_cost_changed"]].index.tolist():
         data[data["物件名"] == name].sort_values(by="date")[COLUMNS_PRICE].to_csv(
-            "./results/{}.csv".format(name)
+            "./results/{}/{}.csv".format(tag, name)
         )
 
 

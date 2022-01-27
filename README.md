@@ -6,6 +6,7 @@ config file
 
 ```
 {
+  "sleep_sec": 3,
   "search_url": "YOUR_URL",
   "tag": "YOUR_TAG",
   "block_list": [
