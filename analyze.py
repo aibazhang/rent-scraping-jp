@@ -3,7 +3,6 @@ import numpy as np
 import glob
 import json
 
-import matplotlib.pyplot as plt
 from datetime import datetime
 
 block_list = json.load(open("./config.json", "r"))["block_list"]
@@ -92,13 +91,6 @@ def get_newest_frame(frame, only_avaliable=True):
             subset=["date", "物件名"], keep="last"
         )
     return frame.sort_values(by="rental_cost").set_index("物件名")
-
-
-def draw_past_rent(newest_frame, frame, apartment_name):
-    newest_info = newest_frame[newest_frame["物件名"] == apartment_name]
-    df = frame[frame["物件名"] == apartment_name]
-    plt.plot(df["date"], df["rental_cost"])
-    print(newest_info)
 
 
 def analyze_rent():
