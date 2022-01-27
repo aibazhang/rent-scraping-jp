@@ -4,6 +4,7 @@ import re
 import requests
 import json
 
+from pathlib import Path
 import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -106,7 +107,13 @@ def parse_url(url, data, errors):
         pass
 
 
-def post_process(data, errors, tag):
+def post_process(data, errors):
+    tag = json.load(open("./config.json", "r"))["tag"]
+    file_path = os.path.dirname(__file__)
+    Path("{}/data/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
+    Path("{}/error/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
+
+
     house_info_df = pd.DataFrame(
         data,
         columns=[
@@ -128,8 +135,8 @@ def post_process(data, errors, tag):
     )
 
     datetime_now = datetime.now()
-
     date_str = datetime_now.strftime("%Y_%m_%d_%H_%M")
+    
     house_info_df["datetime"] = datetime_now
     house_info_df = (
         house_info_df.drop_duplicates(subset=["立地1", "家賃", "住所", "築年数"], keep="first")
@@ -138,20 +145,20 @@ def post_process(data, errors, tag):
     )
 
     house_info_df.to_csv(
-        "{}/data/{}_{}.csv".format(
-            os.path.dirname(__file__),
-            date_str,
+        "{}/data/{}/{}.csv".format(
+            file_path,
             tag,
+            date_str,
         )
     )
 
     if len(errors) > 0:
         errors_df = pd.DataFrame(errors)
         errors_df.to_csv(
-            "{}/error/{}_{}.csv".format(
-                os.path.dirname(__file__),
-                date_str,
+            "{}/error/{}/{}.csv".format(
+                file_path,
                 tag,
+                date_str,
             )
         )
 
@@ -159,14 +166,13 @@ def post_process(data, errors, tag):
 def main():
     # SUUMO 検索条件
     search_url = json.load(open("./config.json", "r"))["search_url"]
-    tag = json.load(open("./config.json", "r"))["tag"]
-
+    
     urls = crawl_url_list(search_url)
     data = []
     errors = []
     for url in urls:
         parse_url(url, data, errors)
-    post_process(data, errors, tag)
+    post_process(data, errors)
 
 
 if __name__ == "__main__":
