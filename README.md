@@ -1,5 +1,7 @@
 # Rent Scraping in Japan
 
+Scirpts for crawling rent info in Japan from Internet and analyzing them
+
 config file
 
 ```
