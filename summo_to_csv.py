@@ -8,18 +8,20 @@ import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
 
+
 def crawl_url_list(base_url):
     content = requests.get(base_url).content
     soup = BeautifulSoup(content, "html.parser")
-    pages = soup.find("body").find_all("div", {"class": "pagination pagination_set-nav"})
+    pages = soup.find("body").find_all(
+        "div", {"class": "pagination pagination_set-nav"}
+    )
     num_pages = int(pages[0].find_all("li")[-1].find(text=re.compile(".*?(\d+).*")))
     return [base_url] + [base_url + "&pn=" + str(i) for i in range(2, num_pages + 1)]
 
+
 def parse_house_info(data, cas):
     # 物件名
-    subtitle = cas.find(
-        "div", {"class": "cassetteitem_content-title"}
-    ).string
+    subtitle = cas.find("div", {"class": "cassetteitem_content-title"}).string
 
     # 住所
     location = cas.find("li", {"class": "cassetteitem_detail-col1"}).string
@@ -27,9 +29,9 @@ def parse_house_info(data, cas):
     # 最寄駅
     station_list = [
         s.string
-        for s in cas.find(
-            "li", {"class": "cassetteitem_detail-col2"}
-        ).find_all("div", {"class": "cassetteitem_detail-text"})
+        for s in cas.find("li", {"class": "cassetteitem_detail-col2"}).find_all(
+            "div", {"class": "cassetteitem_detail-text"}
+        )
     ]
 
     # 築年数、階数
@@ -45,9 +47,7 @@ def parse_house_info(data, cas):
         # 　管理費
         admin = tbody.find(
             "span",
-            {
-                "class": "cassetteitem_price cassetteitem_price--administration"
-            },
+            {"class": "cassetteitem_price cassetteitem_price--administration"},
         ).string
         # 　敷金
         deposit = tbody.find(
@@ -60,15 +60,11 @@ def parse_house_info(data, cas):
             {"class": "cassetteitem_price cassetteitem_price--gratuity"},
         ).string
         # 　間取り
-        floor_plan = tbody.find(
-            "span", {"class": "cassetteitem_madori"}
-        ).string
+        floor_plan = tbody.find("span", {"class": "cassetteitem_madori"}).string
         # 　面積
         area = tbody.find(text=re.compile(".*?(\d+\.\d+m).*"))
         # 　物件階
-        floor = re.sub(
-            r"[\r*\n*\t*]", "", tbody.find(text=re.compile(".*?\s(\d+階).*"))
-        )
+        floor = re.sub(r"[\r*\n*\t*]", "", tbody.find(text=re.compile(".*?\s(\d+階).*")))
         data.append(
             [
                 subtitle,
@@ -88,7 +84,9 @@ def parse_house_info(data, cas):
             ]
         )
 
+
 def parse_url(url, data, errors):
+    sleep_sec = json.load(open("./config.json", "r"))["sleep_sec"]
     try:
         content = requests.get(url).content
         soup = BeautifulSoup(content, "html.parser")
@@ -101,11 +99,12 @@ def parse_url(url, data, errors):
                 errors.append([e, url, len(data)])
                 pass
 
-        time.sleep(3)
+        time.sleep(sleep_sec)
 
     except Exception as e:
         errors.append([e, url, len(data)])
         pass
+
 
 def post_process(data, errors, tag):
     house_info_df = pd.DataFrame(
@@ -127,7 +126,6 @@ def post_process(data, errors, tag):
             "面積",
         ],
     )
-
 
     datetime_now = datetime.now()
 
