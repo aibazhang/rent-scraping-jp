@@ -107,8 +107,7 @@ def parse_url(url, data, errors):
         pass
 
 
-def post_process(data, errors):
-    tag = json.load(open("./config.json", "r"))["tag"]
+def post_process(data, errors, tag):
     file_path = os.path.dirname(__file__)
     Path("{}/data/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
     Path("{}/error/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
@@ -162,18 +161,20 @@ def post_process(data, errors):
             )
         )
 
-
-def main():
-    # SUUMO 検索条件
-    search_url = json.load(open("./config.json", "r"))["search_url"]
     
-    urls = crawl_url_list(search_url)
-    data = []
-    errors = []
-    for url in urls:
-        parse_url(url, data, errors)
-    post_process(data, errors)
+
+def crawl_house():
+    for h in json.load(open("./config.json", "r"))["crawler_config"]:
+        
+        urls = crawl_url_list(h['search_url'])
+        data = []
+        errors = []
+
+        for url in urls:
+            parse_url(url, data, errors)
+        
+        post_process(data, errors, h['tag'])
 
 
 if __name__ == "__main__":
-    main()
+    crawl_house()

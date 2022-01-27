@@ -7,11 +7,21 @@ config file
 ```
 {
   "sleep_sec": 3,
-  "search_url": "YOUR_URL",
-  "tag": "YOUR_TAG",
-  "block_list": [
-    "NAME1",
-    "NAME2"
+  "crawler_config": [
+    {
+      "search_url": "YOUR_URL_1",
+      "tag": "YOUR_TAG_1",
+      "block_list": [
+        "APARTMENT_NAME_1",
+        "APARTMENT_NAME_2"
+      ]
+    },
+    {
+      "search_url": "YOUR_URL_2",
+      "tag": "YOUR_TAG_2",
+      "block_list": []
+    }
   ]
+
 }
 ```
