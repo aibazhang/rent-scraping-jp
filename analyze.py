@@ -84,12 +84,14 @@ def process_frame(frame):
 
 def get_newest_frame(frame, only_avaliable=True):
     if only_avaliable:
-        return (
-            frame[frame["date"] == frame["date"].max()]
-            .drop_duplicates(subset=["物件名"], keep="last")
-            .sort_values(by="rental_cost")
-            .set_index("物件名")
+        frame = frame[frame["date"] == frame["date"].max()].drop_duplicates(
+            subset=["物件名"], keep="last"
         )
+    else:
+        frame = frame.sort_values(by="date").drop_duplicates(
+            subset=["date", "物件名"], keep="last"
+        )
+    return frame.sort_values(by="rental_cost").set_index("物件名")
 
 
 def draw_past_rent(newest_frame, frame, apartment_name):
@@ -101,12 +103,14 @@ def draw_past_rent(newest_frame, frame, apartment_name):
 
 def analyze_rent():
     data = process_frame(read_multi_csv())
-    newest_frame = get_newest_frame(data)
+    newest_rentable_frame = get_newest_frame(data)
 
     # 投稿回数を追加する
     num_posts = data.value_counts(["物件名"])
-    newest_frame["num_posts"] = num_posts[newest_frame.index].tolist()
-    newest_frame[COLUMNS].to_csv("results/rentable_houses.csv")
+    newest_rentable_frame["num_posts"] = num_posts[newest_rentable_frame.index].tolist()
+    newest_rentable_frame[COLUMNS].to_csv("results/rentable_houses.csv")
+
+    newest_frame = get_newest_frame(data, only_avaliable=False)
     for name in newest_frame[newest_frame["rental_cost_changed"]].index.tolist():
         data[data["物件名"] == name].sort_values(by="date")[COLUMNS_PRICE].to_csv(
             "./results/{}.csv".format(name)
