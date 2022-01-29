@@ -1,8 +1,6 @@
 data/*
-!data/.gitkeep
 
 error/*
-!error/.gitkeep
 
 results/*
 
