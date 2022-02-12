@@ -9,6 +9,8 @@ import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
 
+FILE_PATH = os.path.dirname(__file__)
+CONFIG_FILE_PATH = os.path.join(FILE_PATH, "config.json")
 
 def crawl_url_list(base_url):
     content = requests.get(base_url).content
@@ -87,7 +89,7 @@ def parse_house_info(data, cas):
 
 
 def parse_url(url, data, errors):
-    sleep_sec = json.load(open("./config.json", "r"))["sleep_sec"]
+    sleep_sec = json.load(open(CONFIG_FILE_PATH, "r"))["sleep_sec"]
     try:
         content = requests.get(url).content
         soup = BeautifulSoup(content, "html.parser")
@@ -108,9 +110,9 @@ def parse_url(url, data, errors):
 
 
 def post_process(data, errors, tag):
-    file_path = os.path.dirname(__file__)
-    Path("{}/data/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
-    Path("{}/error/{}".format(file_path, tag)).mkdir(parents=True, exist_ok=True)
+    FILE_PATH = os.path.dirname(__file__)
+    Path("{}/data/{}".format(FILE_PATH, tag)).mkdir(parents=True, exist_ok=True)
+    Path("{}/error/{}".format(FILE_PATH, tag)).mkdir(parents=True, exist_ok=True)
 
 
     house_info_df = pd.DataFrame(
@@ -145,7 +147,7 @@ def post_process(data, errors, tag):
 
     house_info_df.to_csv(
         "{}/data/{}/{}.csv".format(
-            file_path,
+            FILE_PATH,
             tag,
             date_str,
         )
@@ -155,7 +157,7 @@ def post_process(data, errors, tag):
         errors_df = pd.DataFrame(errors)
         errors_df.to_csv(
             "{}/error/{}/{}.csv".format(
-                file_path,
+                FILE_PATH,
                 tag,
                 date_str,
             )
@@ -164,7 +166,7 @@ def post_process(data, errors, tag):
     
 
 def crawl_house():
-    for h in json.load(open("./config.json", "r"))["crawler_config"]:
+    for h in json.load(open(CONFIG_FILE_PATH, "r"))["crawler_config"]:
         
         urls = crawl_url_list(h['search_url'])
         data = []

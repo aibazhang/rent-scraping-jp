@@ -2,9 +2,13 @@ import pandas as pd
 import numpy as np
 import glob
 import json
+import os
 
 from datetime import datetime
 from pathlib import Path
+
+FILE_PATH = os.path.dirname(__file__)
+CONFIG_FILE_PATH = os.path.join(FILE_PATH, "config.json")
 
 def read_multi_csv(path):
     all_files = glob.glob(path + "/*.csv")
@@ -74,20 +78,20 @@ def get_newest_frame(frame, only_avaliable=True):
 
 
 def analyze_rent():
-    columns = json.load(open("./config.json", "r"))["colmuns"]
-    price_columns = json.load(open("./config.json", "r"))["price_columns"]
+    columns = json.load(open(CONFIG_FILE_PATH, "r"))["colmuns"]
+    price_columns = json.load(open(CONFIG_FILE_PATH, "r"))["price_columns"]
 
-    for h in json.load(open("./config.json", "r"))["crawler_config"]:
+    for h in json.load(open(CONFIG_FILE_PATH, "r"))["crawler_config"]:
         tag = h['tag']
-        Path("./results/{}".format(tag)).mkdir(parents=True, exist_ok=True)
+        Path("{}/results/{}".format(FILE_PATH, tag)).mkdir(parents=True, exist_ok=True)
 
-        data = process_frame(read_multi_csv("./data/{}".format(tag)), h["block_list"])
+        data = process_frame(read_multi_csv("{}/data/{}".format(FILE_PATH, tag)), h["block_list"])
         newest_rentable_frame = get_newest_frame(data)
 
         # 投稿回数を追加する
         num_posts = data.value_counts(["物件名"])
         newest_rentable_frame["num_posts"] = num_posts[newest_rentable_frame.index].tolist()
-        newest_rentable_frame[columns].to_csv("./results/{}/rentable_houses.csv".format(tag))
+        newest_rentable_frame[columns].to_csv("{}/results/{}/rentable_houses.csv".format(FILE_PATH, tag))
 
         newest_frame = get_newest_frame(data, only_avaliable=False)
 
@@ -97,11 +101,11 @@ def analyze_rent():
         
         for name in cost_change_list:
             data[data["物件名"] == name].sort_values(by="date")[price_columns].to_csv(
-                "./results/{}/CHANGED_{}.csv".format(tag, name)
+                "{}/results/{}/CHANGED_{}.csv".format(FILE_PATH, tag, name)
             )
         for name in cost_not_change_list:
             data[data["物件名"] == name].sort_values(by="date")[price_columns].to_csv(
-                "./results/{}/{}.csv".format(tag, name)
+                "{}/results/{}/{}.csv".format(FILE_PATH, tag, name)
             )
 
 if __name__ == "__main__":
