@@ -97,15 +97,11 @@ def analyze_rent():
 
 
         cost_change_list = newest_frame[newest_frame["rental_cost_changed"]].index.tolist()
-        cost_not_change_list = newest_frame[~newest_frame["rental_cost_changed"]].index.tolist()
         
         for name in cost_change_list:
+            name.replace('/', '')
             data[data["物件名"] == name].sort_values(by="date")[price_columns].to_csv(
                 "{}/results/{}/CHANGED_{}.csv".format(FILE_PATH, tag, name)
-            )
-        for name in cost_not_change_list:
-            data[data["物件名"] == name].sort_values(by="date")[price_columns].to_csv(
-                "{}/results/{}/{}.csv".format(FILE_PATH, tag, name)
             )
 
 if __name__ == "__main__":
