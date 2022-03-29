@@ -46,4 +46,4 @@ Scirpts for crawling rent info in Japan from Internet and analyzing them
 }
 ```
 
-Serach specific house `grep -rnw './data' -e '物件名'`
+Search specific house `grep -rnw './data' -e '物件名'`
