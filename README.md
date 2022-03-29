@@ -2,7 +2,9 @@
 
 Scirpts for crawling rent info in Japan from Internet and analyzing them
 
-config file
+## config file
+
+`config.json`
 
 ```
 {
@@ -43,3 +45,5 @@ config file
 
 }
 ```
+
+Serach specific house `grep -rnw './data' -e '物件名'`
